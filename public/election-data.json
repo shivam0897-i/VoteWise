@@ -1,0 +1,371 @@
+{
+  "schemaVersion": 1,
+  "lastVerified": "2026-04-21T00:00:00+05:30",
+  "sourceMode": "local-fallback",
+  "cycle": {
+    "title": "2026 Assembly election cycle",
+    "dek": "A neutral voter journey for the live April 2026 India Assembly elections.",
+    "summary": "Assam, Kerala, and Puducherry have completed polling. Tamil Nadu and West Bengal are in the active polling window. Counting for all listed states and the Union Territory is scheduled for May 4, 2026.",
+    "officialScheduleUrl": "https://www.pib.gov.in/PressReleasePage.aspx?PRID=2240396"
+  },
+  "events": [
+    {
+      "id": "assam-kerala-puducherry-poll",
+      "label": "Assam, Kerala, Puducherry polling",
+      "type": "poll",
+      "startsAt": "2026-04-09T07:00:00+05:30",
+      "status": "completed",
+      "regions": [
+        "Assam",
+        "Kerala",
+        "Puducherry"
+      ]
+    },
+    {
+      "id": "tamil-nadu-poll",
+      "label": "Tamil Nadu polling",
+      "type": "poll",
+      "startsAt": "2026-04-23T07:00:00+05:30",
+      "status": "upcoming",
+      "regions": [
+        "Tamil Nadu"
+      ]
+    },
+    {
+      "id": "west-bengal-phase-1-poll",
+      "label": "West Bengal Phase I polling",
+      "type": "poll",
+      "startsAt": "2026-04-23T07:00:00+05:30",
+      "status": "upcoming",
+      "regions": [
+        "West Bengal"
+      ]
+    },
+    {
+      "id": "west-bengal-phase-2-poll",
+      "label": "West Bengal Phase II polling",
+      "type": "poll",
+      "startsAt": "2026-04-29T07:00:00+05:30",
+      "status": "upcoming",
+      "regions": [
+        "West Bengal"
+      ]
+    },
+    {
+      "id": "counting-results",
+      "label": "Counting and results",
+      "type": "result",
+      "startsAt": "2026-05-04T08:00:00+05:30",
+      "status": "upcoming",
+      "regions": [
+        "Assam",
+        "Kerala",
+        "Puducherry",
+        "Tamil Nadu",
+        "West Bengal"
+      ]
+    }
+  ],
+  "regions": [
+    {
+      "name": "Assam",
+      "seats": 126,
+      "status": "voted",
+      "pollLabel": "Polled on April 9",
+      "nextAction": "Wait for counting on May 4."
+    },
+    {
+      "name": "Kerala",
+      "seats": 140,
+      "status": "voted",
+      "pollLabel": "Polled on April 9",
+      "nextAction": "Wait for counting on May 4."
+    },
+    {
+      "name": "Puducherry",
+      "seats": 30,
+      "status": "voted",
+      "pollLabel": "Polled on April 9",
+      "nextAction": "Wait for counting on May 4."
+    },
+    {
+      "name": "Tamil Nadu",
+      "seats": 234,
+      "status": "upcoming",
+      "pollLabel": "Polls on April 23",
+      "nextAction": "Check your name, booth, and ID before polling day."
+    },
+    {
+      "name": "West Bengal",
+      "seats": 294,
+      "status": "upcoming",
+      "pollLabel": "Polls on April 23 and April 29",
+      "nextAction": "Confirm your phase and polling booth before leaving."
+    }
+  ],
+  "journey": [
+    {
+      "id": "announcement",
+      "step": 1,
+      "title": "Schedule announcement",
+      "phase": "completed",
+      "short": "ECI announces dates and the Model Code of Conduct starts.",
+      "details": [
+        "The Election Commission announces the schedule for each election.",
+        "The Model Code of Conduct comes into force from the announcement.",
+        "For the 2026 cycle, ECI announced the schedule on March 15, 2026."
+      ],
+      "sourceIds": [
+        "schedule"
+      ]
+    },
+    {
+      "id": "roll",
+      "step": 2,
+      "title": "Voter roll and eligibility",
+      "phase": "active",
+      "short": "Your name on the electoral roll is the gate-pass to voting.",
+      "details": [
+        "A voter can vote only if their name appears on the electoral roll.",
+        "General voters use Form 6 for new registration and Form 8 for correction, shifting, replacement EPIC, or PwD marking.",
+        "Qualifying dates for turning 18 are January 1, April 1, July 1, and October 1."
+      ],
+      "sourceIds": [
+        "sveep-general",
+        "sveep-vote"
+      ]
+    },
+    {
+      "id": "nomination",
+      "step": 3,
+      "title": "Candidate nomination",
+      "phase": "completed",
+      "short": "Candidates file papers and affidavits with the Returning Officer.",
+      "details": [
+        "Candidates submit nomination papers during the notified window.",
+        "Returning Officers handle constituency-level nomination work.",
+        "Voters can review candidate information through official candidate-affidavit services when available."
+      ],
+      "sourceIds": [
+        "candidate-affidavit"
+      ]
+    },
+    {
+      "id": "scrutiny",
+      "step": 4,
+      "title": "Scrutiny and withdrawal",
+      "phase": "completed",
+      "short": "Papers are checked, invalid nominations are rejected, and the final list is published.",
+      "details": [
+        "Returning Officers scrutinize nominations after the filing deadline.",
+        "Candidates may withdraw within the notified withdrawal window.",
+        "The final contesting-candidate list is published after withdrawals."
+      ],
+      "sourceIds": [
+        "schedule"
+      ]
+    },
+    {
+      "id": "campaign",
+      "step": 5,
+      "title": "Campaign and silence period",
+      "phase": "active",
+      "short": "Campaigning is allowed until the legally required silence period.",
+      "details": [
+        "Campaign activity must follow election law and the Model Code of Conduct.",
+        "The silence period covers the 48 hours ending with the close of poll in the polling area.",
+        "Dry-day restrictions also apply around polling under Section 135C of the Representation of the People Act, 1951."
+      ],
+      "sourceIds": [
+        "dry-day"
+      ]
+    },
+    {
+      "id": "poll-day",
+      "step": 6,
+      "title": "Polling day",
+      "phase": "next",
+      "short": "Check roll, carry accepted ID, vote on EVM, verify VVPAT.",
+      "details": [
+        "At the booth, officials check your name and ID, mark ink, issue a slip, and record your signature in Form 17A.",
+        "You press the EVM button for your chosen candidate or NOTA.",
+        "The VVPAT slip is visible for 7 seconds before it drops into the sealed box.",
+        "Mobile phones, cameras, and gadgets are not allowed inside the polling booth."
+      ],
+      "sourceIds": [
+        "sveep-vote"
+      ]
+    },
+    {
+      "id": "accessible-vote",
+      "step": 7,
+      "title": "Accessible voting support",
+      "phase": "active",
+      "short": "Eligible 85+ voters and PwD voters can use special support where notified.",
+      "details": [
+        "Home voting is an optional postal-ballot facility for voters above 85 years and PwD voters flagged in the electoral roll.",
+        "Such voters apply to the Returning Officer within 5 days from notification.",
+        "Voters who do not opt for home voting should receive polling-station assistance such as volunteers and wheelchairs."
+      ],
+      "sourceIds": [
+        "home-voting"
+      ]
+    },
+    {
+      "id": "identity",
+      "step": 8,
+      "title": "Accepted voter identity",
+      "phase": "active",
+      "short": "EPIC is common, but alternate photo IDs are accepted if your name is on the roll.",
+      "details": [
+        "The presence of your name on the electoral roll is mandatory.",
+        "If you cannot produce EPIC, ECI permits approved alternate photo identity documents.",
+        "Examples include Aadhaar, passport, driving licence, PAN card, MNREGA job card, and UDID card."
+      ],
+      "sourceIds": [
+        "alternate-id"
+      ]
+    },
+    {
+      "id": "counting",
+      "step": 9,
+      "title": "Counting",
+      "phase": "upcoming",
+      "short": "Votes are counted after sealed machines and records reach counting centers.",
+      "details": [
+        "Counting is scheduled after polling concludes for all phases in this cycle.",
+        "For the 2026 cycle listed here, counting is scheduled for May 4, 2026.",
+        "Constituency results determine who forms the government under the First Past the Post system."
+      ],
+      "sourceIds": [
+        "schedule"
+      ]
+    },
+    {
+      "id": "after-result",
+      "step": 10,
+      "title": "After results",
+      "phase": "upcoming",
+      "short": "The winning candidate is declared and the majority side forms government.",
+      "details": [
+        "The candidate with the highest valid votes in a constituency wins that seat.",
+        "The party or alliance with majority support forms government.",
+        "Citizens can continue using official portals for results, candidate records, and future voter-roll updates."
+      ],
+      "sourceIds": [
+        "results"
+      ]
+    }
+  ],
+  "readiness": {
+    "statesPlaceholder": "Choose your state or UT",
+    "defaultActionLabel": "Check official voter services"
+  },
+  "simulator": [
+    {
+      "icon": "travel_explore",
+      "title": "Find your booth",
+      "text": "Confirm your polling station before leaving home. Your booth can be checked on official voter services."
+    },
+    {
+      "icon": "badge",
+      "title": "Carry accepted ID",
+      "text": "EPIC is standard. If you do not have it, carry an approved alternate photo ID and make sure your name is on the roll."
+    },
+    {
+      "icon": "how_to_reg",
+      "title": "Identity check",
+      "text": "The first polling official checks your name in the voter list and verifies your ID proof."
+    },
+    {
+      "icon": "gesture",
+      "title": "Ink and Form 17A",
+      "text": "The second polling official marks your finger, gives you a slip, and takes your signature in Form 17A."
+    },
+    {
+      "icon": "fact_check",
+      "title": "Cast and verify",
+      "text": "Press the EVM button, hear the beep, and verify the VVPAT slip visible for 7 seconds."
+    }
+  ],
+  "tools": [
+    {
+      "id": "roll-search",
+      "icon": "person_search",
+      "title": "Check voter roll",
+      "description": "Search whether your name appears in the electoral roll.",
+      "href": "https://electoralsearch.eci.gov.in"
+    },
+    {
+      "id": "voter-services",
+      "icon": "assignment",
+      "title": "Forms and voter services",
+      "description": "Use official services for Form 6, Form 8, status checks, and voter details.",
+      "href": "https://voters.eci.gov.in"
+    },
+    {
+      "id": "candidate",
+      "icon": "manage_accounts",
+      "title": "Know your candidate",
+      "description": "Review candidate affidavits and public candidate information.",
+      "href": "https://affidavit.eci.gov.in"
+    },
+    {
+      "id": "complaint",
+      "icon": "report",
+      "title": "Report violation",
+      "description": "Use cVIGIL for Model Code of Conduct and election-related complaints.",
+      "href": "https://cvigil.eci.gov.in"
+    }
+  ],
+  "chatSuggestions": [
+    "My name is on the roll but I do not have EPIC. Can I vote?",
+    "Which form do I use to correct my address?",
+    "What happens inside the polling booth?",
+    "How does home voting work for 85+ voters?",
+    "When is counting for the 2026 Assembly elections?",
+    "What is the 48-hour silence period?"
+  ],
+  "officialSources": [
+    {
+      "id": "schedule",
+      "label": "PIB: 2026 Assembly election schedule",
+      "href": "https://www.pib.gov.in/PressReleasePage.aspx?PRID=2240396"
+    },
+    {
+      "id": "dry-day",
+      "label": "PIB: Polling, counting, and dry-day implementation",
+      "href": "https://www.pib.gov.in/PressReleasePage.aspx?PRID=2253728&lang=1&reg=6"
+    },
+    {
+      "id": "alternate-id",
+      "label": "PIB: 12 alternate photo IDs apart from EPIC",
+      "href": "https://www.pib.gov.in/PressReleseDetailm.aspx?PRID=2177191"
+    },
+    {
+      "id": "sveep-general",
+      "label": "ECI SVEEP: General voter registration",
+      "href": "https://ecisveep.nic.in/voters/general-voters/"
+    },
+    {
+      "id": "sveep-vote",
+      "label": "ECI SVEEP: How to vote",
+      "href": "https://ecisveep.nic.in/voters/how-to-vote/"
+    },
+    {
+      "id": "home-voting",
+      "label": "PIB: Home voting for 85+ and PwD voters",
+      "href": "https://www.pib.gov.in/PressReleasePage.aspx?PRID=2246940&lang=1&reg=6"
+    },
+    {
+      "id": "candidate-affidavit",
+      "label": "ECI Candidate Affidavit Portal",
+      "href": "https://affidavit.eci.gov.in"
+    },
+    {
+      "id": "results",
+      "label": "ECI Results Portal",
+      "href": "https://results.eci.gov.in"
+    }
+  ]
+}
