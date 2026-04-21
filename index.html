@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VoteWise - Election Process Assistant</title>
+  <meta
+    name="description"
+    content="A dynamic, neutral assistant that helps Indian voters understand election timelines, forms, polling-day steps, accessibility, and official services."
+  />
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://translate.google.com https://translate.googleapis.com https://generativelanguage.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://translate.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.google.com https://*.googleapis.com https://*.gstatic.com; frame-src https://www.google.com https://maps.google.com; connect-src 'self' https://generativelanguage.googleapis.com https://translate.googleapis.com;"
+  />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗳️</text></svg>" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗳️</text></svg>" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Anek+Latin:wght@400;500;600;700;800&family=Noto+Sans:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <style>body.is-loading{opacity:0}body{transition:opacity .2s ease-in}</style>
+</head>
+<body class="is-loading">
+  <noscript>
+    <div style="padding:2rem;text-align:center;font-family:sans-serif;background:#fff8ed;border-bottom:2px solid #e95f3d;">
+      <h2>JavaScript Required</h2>
+      <p>VoteWise needs JavaScript to load election data, power the AI assistant, and run the interactive quiz. Please enable JavaScript in your browser settings.</p>
+      <p>Meanwhile, you can check your voter registration at <a href="https://electoralsearch.eci.gov.in">electoralsearch.eci.gov.in</a>.</p>
+    </div>
+  </noscript>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <nav class="lang-bar notranslate" translate="no" aria-label="Language selector">
+    <div class="lang-bar__inner">
+      <span class="lang-bar__icon material-icons" aria-hidden="true">translate</span>
+      <span class="lang-bar__label">Language:</span>
+      <div class="lang-bar__pills" id="lang-pills" role="radiogroup" aria-label="Choose language">
+        <button class="lang-pill lang-pill--active" data-lang="en" role="radio" aria-checked="true">English</button>
+        <button class="lang-pill" data-lang="hi" role="radio" aria-checked="false">हिन्दी</button>
+        <button class="lang-pill" data-lang="ta" role="radio" aria-checked="false">தமிழ்</button>
+        <button class="lang-pill" data-lang="bn" role="radio" aria-checked="false">বাংলা</button>
+        <button class="lang-pill" data-lang="ml" role="radio" aria-checked="false">മലയാളം</button>
+        <button class="lang-pill" data-lang="as" role="radio" aria-checked="false">অসমীয়া</button>
+        <button class="lang-pill" data-lang="te" role="radio" aria-checked="false">తెలుగు</button>
+        <button class="lang-pill" data-lang="kn" role="radio" aria-checked="false">ಕನ್ನಡ</button>
+        <button class="lang-pill" data-lang="mr" role="radio" aria-checked="false">मराठी</button>
+        <button class="lang-pill" data-lang="gu" role="radio" aria-checked="false">ગુજરાતી</button>
+        <button class="lang-pill" data-lang="pa" role="radio" aria-checked="false">ਪੰਜਾਬੀ</button>
+        <button class="lang-pill" data-lang="or" role="radio" aria-checked="false">ଓଡ଼ିଆ</button>
+        <button class="lang-pill" data-lang="ur" role="radio" aria-checked="false">اردو</button>
+      </div>
+    </div>
+  </nav>
+
+
+  <header class="hero" role="banner">
+    <div class="shell hero__grid">
+      <div class="hero__copy">
+        <p class="eyebrow">VoteWise</p>
+        <h1 id="cycle-title">Loading election cycle</h1>
+        <p id="cycle-summary" class="hero__summary">Preparing current election context...</p>
+        <div class="hero__actions">
+          <a class="btn btn--primary" href="#readiness">
+            <span class="material-icons" aria-hidden="true">fact_check</span>
+            Check readiness
+          </a>
+          <a class="btn btn--ghost" href="#chatbot">
+            <span class="material-icons" aria-hidden="true">chat</span>
+            Ask VoteWise
+          </a>
+        </div>
+      </div>
+
+      <div class="ballot-visual" aria-label="Election timeline snapshot">
+        <div class="metric">
+          <span class="metric__label" id="timer-next-label">Next event</span>
+          <span class="metric__value" id="timer-next-event" aria-live="polite">Loading...</span>
+        </div>
+        <div class="metric">
+          <span class="metric__label" id="timer-results-label">Results</span>
+          <span class="metric__value" id="timer-results" aria-live="polite">Loading...</span>
+        </div>
+        <div class="ballot-visual__machine">
+          <span class="material-icons" aria-hidden="true">how_to_vote</span>
+          <div class="ballot-visual__slip" aria-hidden="true">
+            <span><b></b> Roll check</span>
+            <span><b></b> ID verified</span>
+            <span><b></b> VVPAT seen</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="shell">
+      <div id="region-track" class="region-track" aria-label="State election status"></div>
+      <p id="data-status" class="data-status" aria-live="polite">Loading data status...</p>
+    </div>
+  </header>
+
+  <main id="main-content">
+    <section id="readiness" class="section section--paper" aria-labelledby="readiness-heading">
+      <div class="shell split">
+        <div>
+          <p class="eyebrow">Personal path</p>
+          <h2 id="readiness-heading">Am I ready to vote?</h2>
+          <p class="section-lede">
+            Answer five quick checks and VoteWise will choose the next practical step.
+          </p>
+        </div>
+
+        <form class="readiness-form" id="readiness-form">
+          <label>
+            State or UT
+            <select id="readiness-state" name="region" required></select>
+          </label>
+
+          <label>
+            Age status
+            <select name="age" required>
+              <option value="eligible">I am 18 or older on a qualifying date</option>
+              <option value="soon">I turn 18 this year</option>
+              <option value="underage">I am not eligible yet</option>
+            </select>
+          </label>
+
+          <label>
+            Name on electoral roll
+            <select name="roll" required>
+              <option value="unsure">I am not sure</option>
+              <option value="yes">Yes, my name appears</option>
+              <option value="no">No, my name is missing</option>
+            </select>
+          </label>
+
+          <label>
+            Voter ID / EPIC
+            <select name="epic" required>
+              <option value="yes">I have EPIC or e-EPIC</option>
+              <option value="no">I do not have EPIC with me</option>
+            </select>
+          </label>
+
+          <label>
+            Assistance needs
+            <select name="support" required>
+              <option value="none">No special assistance</option>
+              <option value="pwd85">PwD or 85+ voter support may apply</option>
+            </select>
+          </label>
+
+          <button class="btn btn--primary" type="submit">
+            <span class="material-icons" aria-hidden="true">route</span>
+            Build my next step
+          </button>
+        </form>
+      </div>
+
+      <div class="shell">
+        <div id="readiness-result" class="readiness-result" hidden></div>
+      </div>
+    </section>
+
+    <section id="journey" class="section" aria-labelledby="journey-heading">
+      <div class="shell section-head">
+        <p class="eyebrow">Process map</p>
+        <h2 id="journey-heading">Election journey</h2>
+        <p class="section-lede">
+          A source-backed flow from registration and candidate nomination to polling and results.
+        </p>
+      </div>
+      <div class="shell">
+        <div class="timeline" id="timeline" role="list"></div>
+      </div>
+    </section>
+
+    <section id="simulator" class="section section--ink" aria-labelledby="simulator-heading">
+      <div class="shell simulator">
+        <div class="section-head section-head--light">
+          <p class="eyebrow">Booth walk-through</p>
+          <h2 id="simulator-heading">Polling day in five moves</h2>
+          <p class="section-lede">
+            A fast practice run through what happens at the polling station.
+          </p>
+        </div>
+
+        <div class="simulator-grid">
+          <div id="simulator-steps" class="simulator-steps" aria-label="Polling day simulator steps"></div>
+          <article id="simulator-panel" class="simulator-card" aria-live="polite"></article>
+          <div class="simulator-actions">
+            <button id="simulator-prev" class="btn btn--ghost btn--light" type="button">
+              <span class="material-icons" aria-hidden="true">arrow_back</span>
+              Back
+            </button>
+            <button id="simulator-next" class="btn btn--primary" type="button">
+              Next
+              <span class="material-icons" aria-hidden="true">arrow_forward</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tools" class="section section--paper" aria-labelledby="tools-heading">
+      <div class="shell section-head">
+        <p class="eyebrow">Official actions</p>
+        <h2 id="tools-heading">Voter tools</h2>
+        <p class="section-lede">Jump to official ECI services for the tasks VoteWise recommends.</p>
+      </div>
+      <div class="shell">
+        <div id="tools-grid" class="tools-grid"></div>
+      </div>
+    </section>
+
+    <section id="chatbot" class="section" aria-labelledby="chat-heading">
+      <div class="shell chat-layout">
+        <div>
+          <p class="eyebrow">Gemini assistant</p>
+          <h2 id="chat-heading">Ask VoteWise</h2>
+          <p class="section-lede">
+            The assistant uses the loaded election dataset and can use Google Search grounding for fresh civic facts.
+          </p>
+        </div>
+
+        <div class="chat" aria-label="Chat with VoteWise">
+          <div class="chat__header">
+            <span class="material-icons" aria-hidden="true">smart_toy</span>
+            <div>
+              <strong>VoteWise assistant</strong>
+              <small>Neutral, process-only civic guidance</small>
+            </div>
+          </div>
+
+          <div class="chat__messages" id="chat-messages" aria-live="polite" aria-relevant="additions"></div>
+          <div class="chat__status" id="chat-status" aria-live="assertive"></div>
+          <div class="chat__chips" id="chat-chips" role="list" aria-label="Suggested questions"></div>
+
+          <form class="chat__form" id="chat-form" aria-label="Send a message to VoteWise">
+            <label for="chat-input" class="sr-only">Type your question</label>
+            <input
+              type="text"
+              id="chat-input"
+              class="chat__input"
+              placeholder="Ask about forms, ID, booth steps, dates..."
+              autocomplete="off"
+              required
+            />
+            <button type="submit" class="chat__send" aria-label="Send message">
+              <span class="material-icons" aria-hidden="true">send</span>
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <section id="quiz" class="section section--sun" aria-labelledby="quiz-heading">
+      <div class="shell section-head">
+        <p class="eyebrow">Knowledge check</p>
+        <h2 id="quiz-heading">Election quiz</h2>
+        <p class="section-lede">Gemini generates a new neutral process quiz from the loaded dataset.</p>
+      </div>
+
+      <div class="shell">
+        <div class="quiz" id="quiz-root" role="region" aria-label="Election quiz" aria-live="polite">
+          <div class="quiz__state" id="quiz-idle">
+            <button class="btn btn--primary btn--lg" id="quiz-start" type="button">
+              <span class="material-icons" aria-hidden="true">play_arrow</span>
+              Start quiz
+            </button>
+          </div>
+
+          <div class="quiz__state quiz__state--hidden" id="quiz-loading">
+            <span class="material-icons quiz__spinner" aria-hidden="true">autorenew</span>
+            <p>Generating questions...</p>
+          </div>
+
+          <div class="quiz__state quiz__state--hidden" id="quiz-playing"></div>
+
+          <div class="quiz__state quiz__state--hidden" id="quiz-scored">
+            <div class="quiz__score-circle">
+              <span id="quiz-final-score">0</span>/5
+            </div>
+            <p class="quiz__score-msg" id="quiz-score-msg"></p>
+            <button class="btn btn--ghost" id="quiz-retry" type="button">Retake quiz</button>
+          </div>
+
+          <div class="quiz__state quiz__state--hidden" id="quiz-error">
+            <span class="material-icons quiz__error-icon" aria-hidden="true">error_outline</span>
+            <p id="quiz-error-msg">Something went wrong. Please check your API key and try again.</p>
+            <button class="btn btn--ghost" id="quiz-retry-error" type="button">Try again</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="sources" class="section" aria-labelledby="sources-heading">
+      <div class="shell section-head">
+        <p class="eyebrow">Receipts</p>
+        <h2 id="sources-heading">Official sources</h2>
+      </div>
+      <div class="shell">
+        <div id="sources-list" class="sources-list"></div>
+      </div>
+    </section>
+  </main>
+
+
+  <!-- Hidden Google Translate engine (powers pill clicks) -->
+  <div id="google_translate_element" style="display:none !important"></div>
+  <script>
+    // Protect Material Icons from translation (they use text ligatures like "how_to_vote")
+    function protectIcons() {
+      document.querySelectorAll('.material-icons:not(.notranslate)').forEach(function(el) {
+        el.classList.add('notranslate');
+        el.setAttribute('translate', 'no');
+      });
+    }
+    protectIcons();
+    // Re-protect after DOM changes — debounced to avoid excessive calls during translation
+    var _iconTimer = null;
+    new MutationObserver(function() {
+      if (_iconTimer) return;
+      _iconTimer = setTimeout(function() { _iconTimer = null; protectIcons(); }, 200);
+    }).observe(document.body, { childList: true, subtree: true });
+
+    window.googleTranslateElementInit = function googleTranslateElementInit() {
+      new window.google.translate.TranslateElement({
+        pageLanguage: 'en',
+        includedLanguages: 'hi,ta,te,bn,ml,as,kn,mr,gu,pa,or,ur',
+        autoDisplay: false
+      }, 'google_translate_element');
+    };
+
+    // Wire pill clicks to Google Translate's hidden select
+    document.getElementById('lang-pills').addEventListener('click', function(e) {
+      var pill = e.target.closest('.lang-pill');
+      if (!pill) return;
+
+      // Update active pill visually
+      this.querySelectorAll('.lang-pill').forEach(function(p) {
+        p.classList.remove('lang-pill--active');
+        p.setAttribute('aria-checked', 'false');
+      });
+      pill.classList.add('lang-pill--active');
+      pill.setAttribute('aria-checked', 'true');
+
+      var lang = pill.getAttribute('data-lang');
+
+      if (lang === 'en') {
+        // Clear all Google Translate cookies and reload cleanly
+        document.cookie = 'googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC';
+        document.cookie = 'googtrans=; path=/; domain=.' + location.hostname + '; expires=Thu, 01 Jan 1970 00:00:00 UTC';
+        document.cookie = 'googtrans=; path=/; domain=' + location.hostname + '; expires=Thu, 01 Jan 1970 00:00:00 UTC';
+        window.location.href = location.pathname;
+        return;
+      }
+
+      // Wait for Google Translate to be ready, then trigger language change
+      var attempts = 0;
+      var tryTranslate = function() {
+        var select = document.querySelector('.goog-te-combo');
+        if (select) {
+          select.value = lang;
+          select.dispatchEvent(new Event('change'));
+        } else if (attempts < 20) {
+          attempts++;
+          setTimeout(tryTranslate, 300);
+        }
+      };
+      tryTranslate();
+    });
+  </script>
+  <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+  <footer class="footer" role="contentinfo">
+    <div class="shell">
+      <p>Built for Prompt Wars 2026 Challenge 2. Neutral civic guidance only.</p>
+      <p>Google services used: Gemini API, Search grounding, Google Translate, Google Fonts, and Material Icons.</p>
+    </div>
+  </footer>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
