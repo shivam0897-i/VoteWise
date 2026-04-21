@@ -25,6 +25,59 @@ VoteWise turns official election guidance into:
 - Official source links for verification
 - 13-language support via Google Translate
 
+## Approach and Logic
+
+The core design principle is **data-driven rendering with graceful degradation**.
+No election fact is hardcoded in the UI — everything is sourced from a structured
+data layer and rendered dynamically.
+
+**Decision-making architecture:**
+
+1. **Readiness checker** (`readiness.js`): A branching decision engine that
+   evaluates user inputs (age, registration status, support needs) and returns
+   specific, actionable guidance — not generic advice. Each branch is
+   independently tested with 10 unit tests.
+
+2. **Live data enrichment** (`liveData.js`): On page load, Gemini with Google
+   Search grounding is used to fetch real-time election status (poll dates,
+   results, phases). The response is validated (must contain a non-empty
+   `regions` array), cached in `sessionStorage` for 10 minutes, and merged
+   immutably with the local dataset. If the API call fails, the app falls back
+   to the curated local dataset without any UI disruption.
+
+3. **Quiz generation** (`quiz.js`): Gemini generates election-awareness quizzes
+   in strict JSON mode. The output is validated against a schema (4 options per
+   question, valid `correctIndex`, non-empty fields) before rendering — malformed
+   AI output is rejected, not displayed.
+
+4. **Chat assistant** (`chat.js`): Multi-turn Gemini conversation with a civic
+   system prompt. Rate-limited (3 seconds), history-capped (20 messages), and
+   locally degradable with canned fallback responses when the API is unavailable.
+
+## How It Works
+
+```
+User opens VoteWise
+       │
+       ├─→ Data layer loads:  local fallback → remote JSON → Gemini live enrichment
+       │
+       ├─→ UI renders:  election pulse, countdown timers, state cards
+       │
+       ├─→ User interactions:
+       │     ├─ "Am I ready?" → readiness decision engine → personalized steps
+       │     ├─ "Find my booth" → EPIC validation → Google Maps embed
+       │     ├─ "Ask a question" → Gemini chat with search grounding
+       │     ├─ "Take a quiz" → Gemini JSON generation → schema-validated quiz
+       │     └─ "Election journey" → 10-step accordion with official sources
+       │
+       └─→ All modules init in error boundaries — one failure ≠ full crash
+```
+
+Every interaction is designed for a first-time voter who may not know election
+terminology. The language is plain, the actions are specific, and every claim
+links to an official source (ECI, SVEEP, PIB).
+
+
 ## Dynamic Data Approach
 
 Election facts are not embedded directly in the HTML. The UI is rendered from a
@@ -96,14 +149,19 @@ or Google Apps Script).
 - Semantic HTML5: `<header>`, `<main>`, `<footer>`, `<nav>`, `<details>/<summary>`
 - Single `<h1>` with proper heading hierarchy
 
-## Current Data Assumptions
+## Assumptions
 
-The fallback dataset was verified on April 21, 2026 from official ECI, SVEEP,
-and PIB sources. It covers the 2026 Assembly election cycle for Assam, Kerala,
-Puducherry, Tamil Nadu, and West Bengal.
-
-The app does not recommend parties, candidates, ideologies, or campaign strategy.
-It provides neutral process guidance only.
+- The fallback dataset was verified on April 21, 2026 from official ECI, SVEEP,
+  and PIB sources. It covers the 2026 Assembly election cycle for Assam, Kerala,
+  Puducherry, Tamil Nadu, and West Bengal.
+- The app does not recommend parties, candidates, ideologies, or campaign
+  strategy. It provides neutral process guidance only.
+- EPIC (voter ID) format follows the standard Indian pattern: 3 uppercase
+  letters followed by 7 digits (e.g., `ABC1234567`).
+- The Gemini API key is provided via environment variable and is expected to
+  have access to the Gemini API and Google Search grounding.
+- Users are expected to have a modern browser (ES2020+). A `<noscript>` fallback
+  redirects to the official ECI website for non-JS environments.
 
 ## Setup
 
