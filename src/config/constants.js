@@ -3,13 +3,19 @@
  * Election facts live in src/data/electionData.js or in a remote JSON feed.
  */
 
-export const GEMINI_MODEL = import.meta.env?.VITE_GEMINI_MODEL || 'gemini-2.5-flash';
+export const GEMINI_MODEL = (window.APP_CONFIG && window.APP_CONFIG.VITE_GEMINI_MODEL !== '__GEMINI_MODEL__') 
+  ? window.APP_CONFIG.VITE_GEMINI_MODEL 
+  : import.meta.env?.VITE_GEMINI_MODEL || 'gemini-2.5-flash';
 
 export const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
-export const GEMINI_API_KEY = import.meta.env?.VITE_GEMINI_API_KEY || '';
+export const GEMINI_API_KEY = (window.APP_CONFIG && window.APP_CONFIG.VITE_GEMINI_API_KEY !== '__GEMINI_API_KEY__')
+  ? window.APP_CONFIG.VITE_GEMINI_API_KEY
+  : import.meta.env?.VITE_GEMINI_API_KEY || '';
 
-export const DATA_FEED_URL = import.meta.env?.VITE_ELECTION_DATA_URL || '';
+export const DATA_FEED_URL = (window.APP_CONFIG && window.APP_CONFIG.ELECTION_DATA_URL !== '__ELECTION_DATA_URL__')
+  ? window.APP_CONFIG.ELECTION_DATA_URL
+  : import.meta.env?.VITE_ELECTION_DATA_URL || '';
 
 export const ENABLE_SEARCH_GROUNDING =
   import.meta.env?.VITE_ENABLE_SEARCH_GROUNDING !== 'false';

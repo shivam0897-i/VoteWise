@@ -1,224 +1,156 @@
-# VoteWise
+# VoteWise 🗳️
 
-VoteWise is a dynamic election-process assistant for Prompt Wars 2026 Challenge 2.
-It helps Indian voters understand election timelines, voter-roll checks, forms,
-polling-day steps, accessibility support, and official Election Commission
-services.
+[![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen.svg)](https://votewise-197581117874.us-central1.run.app)
+[![Challenge](https://img.shields.io/badge/Prompt_Wars_2026-Challenge_2-blue.svg)](#)
+[![Powered by Gemini](https://img.shields.io/badge/Powered_by-Google_Gemini-4285F4.svg)](#)
 
-## Chosen Vertical
+> **VoteWise** is a resilient, data-driven election assistant built for Prompt Wars 2026 Challenge 2. 
 
-Civic education / election process guide.
+It transforms dense government PDFs into an interactive, personalized experience, helping Indian voters navigate election timelines, voter-roll checks, forms, and polling-day steps with zero friction.
 
-## Product Idea
+---
+**[🚀 Try the Live Demo on Cloud Run](https://votewise-197581117874.us-central1.run.app)**
+---
 
-The target persona is a first-time or confused voter who does not want to read
-long government PDFs before knowing what to do next.
+<!-- 📸 Screenshot -->
+<p align="center">
+  <img src="./screenshot.png" alt="VoteWise Interface" width="800">
+</p>
 
-VoteWise turns official election guidance into:
+## 📖 Table of Contents
+- [🎯 Chosen Vertical](#-chosen-vertical)
+- [🧠 Approach & Logic](#-approach--logic)
+- [⚙️ How the Solution Works](#️-how-the-solution-works)
+- [🤔 Assumptions Made](#-assumptions-made)
+- [✨ Key Features](#-key-features)
+- [🏗️ Architecture & Security](#️-architecture--security)
+- [♿ Accessibility (a11y)](#-accessibility-a11y)
+- [🚀 Quick Start (Local & Docker)](#-quick-start-local--docker)
+- [🧪 Testing Strategy](#-testing-strategy)
+- [📂 Project Structure](#-project-structure)
 
-- A live election-cycle pulse (real-time via Gemini + Google Search grounding)
-- A personalized "Am I ready to vote?" checker with branch-specific guidance
-- A 10-step election journey with official source backing
-- A polling-booth simulator with Google Maps integration
-- A Gemini assistant for neutral civic questions (with local fallback)
-- A Gemini-generated quiz with strict JSON schema validation
-- Official source links for verification
-- 13-language support via Google Translate
+## 🎯 Chosen Vertical
+**Civic Technology & Voter Education**  
+VoteWise is designed for the Indian electorate, focusing on voter education and civic engagement. It addresses the challenge of information asymmetry during elections by transforming dense, bureaucratic processes into accessible, interactive, and personalized guidance.
 
-## Approach and Logic
+## 🧠 Approach & Logic
+Our core engineering philosophy is **data-driven rendering with graceful degradation**, ensuring zero hallucinations for critical election facts.
 
-The core design principle is **data-driven rendering with graceful degradation**.
-No election fact is hardcoded in the UI — everything is sourced from a structured
-data layer and rendered dynamically.
+1. **AI as a Facilitator, Not a Source**: Gemini is used to synthesize, contextualize, and translate information, while raw facts (dates, booth rules) are strictly sourced from official ECI data.
+2. **The 3-Tier Data Strategy**:
+   - **Tier 1 (Live)**: Real-time election status via Gemini + Google Search Grounding.
+   - **Tier 2 (Remote)**: Dynamic updates via a browser-fetchable `election-data.json`.
+   - **Tier 3 (Local Fallback)**: A curated, zero-latency local dataset guaranteeing offline-capable fallback.
+3. **Strict Validation**: AI outputs (like Quiz generation) are forced into strict JSON schemas and validated client-side before rendering. Malformed AI output is rejected, never displayed.
 
-**Decision-making architecture:**
+## ⚙️ How the Solution Works
+VoteWise provides a frictionless, step-by-step journey for the user:
+1. **Pulse Check**: On load, the app fetches real-time election news using Search Grounding.
+2. **Readiness Evaluation**: The user inputs basic details (age, registration status), and the "Am I ready?" engine branches into specific, actionable guidance (e.g., "Fill Form 6").
+3. **Timeline Navigation**: Users follow a curated 10-step journey from registration to polling day.
+4. **Locate & Learn**: The Polling Booth Simulator uses Google Maps to find nearby booths, while the Quiz Engine tests their knowledge.
+5. **Contextual Chat**: At any point, users can ask the neutral Civic Assistant for help, with rate-limiting and local fallbacks ensuring stability.
 
-1. **Readiness checker** (`readiness.js`): A branching decision engine that
-   evaluates user inputs (age, registration status, support needs) and returns
-   specific, actionable guidance — not generic advice. Each branch is
-   independently tested with 10 unit tests.
+## 🤔 Assumptions Made
+- **Neutrality**: The app assumes a strictly non-partisan stance; it does not recommend candidates or ideologies.
+- **Connectivity**: While fallback mechanisms exist, the primary AI chat and live pulse features assume an active internet connection.
+- **Data Availability**: The application relies on the Election Commission of India (ECI) maintaining consistent guidelines and forms (like Form 6 for new voters).
+- **Modern Browsers**: Assumes users are on modern, ES6-compliant browsers. A `<noscript>` fallback is provided for legacy environments.
 
-2. **Live data enrichment** (`liveData.js`): On page load, Gemini with Google
-   Search grounding is used to fetch real-time election status (poll dates,
-   results, phases). The response is validated (must contain a non-empty
-   `regions` array), cached in `sessionStorage` for 10 minutes, and merged
-   immutably with the local dataset. If the API call fails, the app falls back
-   to the curated local dataset without any UI disruption.
+## ✨ Key Features
+- 🟢 **Live Election Pulse**: Real-time status via Gemini + Google Search Grounding.
+- 🛤️ **Personalized "Am I ready?" Checker**: Branch-specific guidance based on user inputs.
+- 📜 **10-Step Journey**: A curated election timeline with official ECI source backing.
+- 📍 **Polling Booth Simulator**: Location-aware booth finder integrated with Google Maps.
+- 💬 **Neutral Civic Assistant**: Gemini-powered chat with strict rate-limiting and local fallbacks.
+- 🧠 **Dynamic Quiz Engine**: Gemini-generated quizzes with strict JSON schema validation.
+- 🌐 **Hyper-Local & Multilingual**: 13-language support via Google Translate.
 
-3. **Quiz generation** (`quiz.js`): Gemini generates election-awareness quizzes
-   in strict JSON mode. The output is validated against a schema (4 options per
-   question, valid `correctIndex`, non-empty fields) before rendering — malformed
-   AI output is rejected, not displayed.
+## 🏗️ Architecture & Security
+VoteWise is hardened for production and complies with strict engineering standards:
 
-4. **Chat assistant** (`chat.js`): Multi-turn Gemini conversation with a civic
-   system prompt. Rate-limited (3 seconds), history-capped (20 messages), and
-   locally degradable with canned fallback responses when the API is unavailable.
+### Runtime Configuration Injection
+API keys and models are **never baked into the static build**. 
+- The Docker container uses an `entrypoint.sh` script to intercept startup and inject environment variables (`GEMINI_API_KEY`, `ELECTION_DATA_URL`) directly into a `window.APP_CONFIG` object.
+- This allows the exact same Docker image to be promoted across environments strictly adhering to 12-factor app principles.
 
-## How It Works
+### Defense-in-Depth Protections
+- **Strict Content Security Policy (CSP)**: Restricts scripts, styles, and connections to known Google origins.
+- **XSS Prevention**: All user and AI text is rendered via `textContent`. `innerHTML` is strictly prohibited. (Verified via `dom.test.js`).
+- **Nginx Hardening**: Production containers serve with `X-Frame-Options`, `X-Content-Type-Options`, and `Referrer-Policy` headers.
+- **Input Validation**: Client-side regex (`/^[A-Z]{3}\d{7}$/`) validates EPIC formats before API submission.
+- **Rate Limiting & Token Capping**: A sliding window history cap (20 messages) and a 3-second cooldown protect the Gemini API quota.
 
-```
-User opens VoteWise
-       │
-       ├─→ Data layer loads:  local fallback → remote JSON → Gemini live enrichment
-       │
-       ├─→ UI renders:  election pulse, countdown timers, state cards
-       │
-       ├─→ User interactions:
-       │     ├─ "Am I ready?" → readiness decision engine → personalized steps
-       │     ├─ "Find my booth" → EPIC validation → Google Maps embed
-       │     ├─ "Ask a question" → Gemini chat with search grounding
-       │     ├─ "Take a quiz" → Gemini JSON generation → schema-validated quiz
-       │     └─ "Election journey" → 10-step accordion with official sources
-       │
-       └─→ All modules init in error boundaries — one failure ≠ full crash
-```
+## ♿ Accessibility (a11y)
+Built to be usable by everyone:
+- **Screen Reader Optimized**: `aria-live` regions for dynamic content, semantic HTML5, and `.sr-only` labels.
+- **Keyboard Navigation**: Skip-to-content links and custom `:focus-visible` outlines.
+- **No-JS Fallback**: A `<noscript>` tag redirects directly to the official ECI portal.
+- **Motion Safe**: Honors `@media (prefers-reduced-motion: reduce)`.
 
-Every interaction is designed for a first-time voter who may not know election
-terminology. The language is plain, the actions are specific, and every claim
-links to an official source (ECI, SVEEP, PIB).
+## 🚀 Quick Start (Local & Docker)
 
+### Prerequisites
+- Node.js 18+
+- Docker (for production builds)
+- Gemini API Key
 
-## Dynamic Data Approach
-
-Election facts are not embedded directly in the HTML. The UI is rendered from a
-data layer with three tiers:
-
-1. **Local fallback**: `src/data/electionData.js` — always available, zero-latency
-2. **Remote feed**: `public/election-data.json` — updatable without code changes
-3. **Live enrichment**: Gemini + Google Search grounding fetches real-time election
-   status on page load, cached in `sessionStorage` for 10 minutes
-
-This keeps the app usable without a backend while allowing the election cycle,
-states, dates, sources, timeline steps, tools, and suggested questions to be
-updated without rewriting the UI.
-
-## Google Services
-
-| Service | Purpose | Module |
-|---|---|---|
-| **Gemini API** | AI chatbot + quiz generation | `api.js`, `chat.js`, `quiz.js` |
-| **Gemini Search Grounding** | Real-time election data enrichment | `liveData.js` |
-| **Google Translate** | 13-language multilingual UI | `index.html` (custom pill UI) |
-| **Google Maps Embed** | Location-aware polling booth finder | `simulator.js` |
-| **Google Fonts** | Multilingual typography (Noto Sans + Anek Latin) | `main.css` |
-| **Material Icons** | Accessible icon system | Throughout |
-
-All services degrade gracefully — no API key means the feature is skipped, not
-that the app crashes.
-
-## Security
-
-### Implemented Protections
-
-- **Content Security Policy (CSP)**: Strict `<meta>` CSP restricts scripts,
-  styles, fonts, frames, and connections to known Google origins only.
-- **XSS prevention**: All user and AI text rendered via `textContent` / `createTextNode`.
-  No `innerHTML` with untrusted data anywhere in the codebase. Regression-tested
-  in `dom.test.js`.
-- **Schema validation**: AI-generated quiz JSON is validated against a strict
-  schema before rendering (tested with 8 edge cases in `quiz.test.js`).
-- **Input validation**: EPIC (voter ID) input validated against Indian format
-  regex (`/^[A-Z]{3}\d{7}$/`) before submission.
-- **Rate limiting**: Client-side 3-second cooldown on chat messages to protect
-  API quota from spam.
-- **Chat history cap**: Sliding window of 20 messages prevents unbounded token
-  growth in long sessions.
-- **External link safety**: All `target="_blank"` links include
-  `rel="noopener noreferrer"`.
-- **Secret management**: `.env` is git-ignored. `.env.example` documents all
-  variables without real keys.
-- **Error boundaries**: Each module initializes in its own try-catch so a failure
-  in one (e.g. Maps API timeout) does not blank the entire page.
-
-### Production Note
-
-The `VITE_GEMINI_API_KEY` is exposed in the client bundle (inherent to Vite's
-`import.meta.env.VITE_*` pattern). For production deployment, proxy Gemini
-requests through a server-side handler (Vercel Functions, Cloudflare Workers,
-or Google Apps Script).
-
-## Accessibility
-
-- Skip-to-content link with visible focus state
-- ARIA landmarks on all sections (`role`, `aria-labelledby`, `aria-label`)
-- `aria-live` regions for dynamic content (countdown, chat, quiz)
-- Screen-reader-only labels (`.sr-only`) for icon-only buttons
-- Custom `:focus-visible` styles for keyboard navigation
-- `@media (prefers-reduced-motion: reduce)` disables all animations
-- `<noscript>` fallback with direct ECI link for non-JS environments
-- Semantic HTML5: `<header>`, `<main>`, `<footer>`, `<nav>`, `<details>/<summary>`
-- Single `<h1>` with proper heading hierarchy
-
-## Assumptions
-
-- The fallback dataset was verified on April 21, 2026 from official ECI, SVEEP,
-  and PIB sources. It covers the 2026 Assembly election cycle for Assam, Kerala,
-  Puducherry, Tamil Nadu, and West Bengal.
-- The app does not recommend parties, candidates, ideologies, or campaign
-  strategy. It provides neutral process guidance only.
-- EPIC (voter ID) format follows the standard Indian pattern: 3 uppercase
-  letters followed by 7 digits (e.g., `ABC1234567`).
-- The Gemini API key is provided via environment variable and is expected to
-  have access to the Gemini API and Google Search grounding.
-- Users are expected to have a modern browser (ES2020+). A `<noscript>` fallback
-  redirects to the official ECI website for non-JS environments.
-
-## Setup
-
+### Local Development
 ```bash
 npm install
 cp .env.example .env
-# Add your Gemini API key to .env:
-# VITE_GEMINI_API_KEY=your_key_here
+# Edit .env with your VITE_GEMINI_API_KEY
 npm run dev
 ```
 
-Optional dynamic data feed:
-
+### Production Docker Deployment
+To build and run the secure production container locally:
 ```bash
-VITE_ELECTION_DATA_URL=https://example.com/election-data.json
+docker build -t votewise .
+docker run -p 8080:80 \
+  -e GEMINI_API_KEY="your_production_key" \
+  -e GEMINI_MODEL="gemini-3.1-pro-preview" \
+  votewise
 ```
 
-## Testing
-
+To deploy directly to Google Cloud Run:
 ```bash
-npm test        # 44+ unit tests across 8 suites
-npm run build   # Production bundle (~22 kB gzipped)
+gcloud run deploy votewise \
+  --source . \
+  --region us-central1 \
+  --set-env-vars="GEMINI_API_KEY=your_key,GEMINI_MODEL=gemini-3.1-pro-preview" \
+  --allow-unauthenticated
 ```
 
-Test coverage spans:
+## 🧪 Testing Strategy
+VoteWise is backed by 44+ unit tests across 8 suites using Vitest.
+
+```bash
+npm test        # Run the test suite
+npm run build   # Build production bundle (~22 kB gzipped)
+```
+**Test Coverage Includes:**
 - XSS injection prevention (`dom.test.js`)
 - AI output schema validation (`quiz.test.js`)
-- Data loading, normalization, and fallback (`data.test.js`)
 - Live data merge immutability (`liveData.test.js`)
-- Voter readiness decision branches (`readiness.test.js`)
-- Countdown formatting (`countdown.test.js`)
-- Chat fallback responses (`chat.test.js`)
-- Public JSON feed integrity (`public-data.test.js`)
+- Voter readiness decision branching (`readiness.test.js`)
 
-## Project Structure
-
+## 📂 Project Structure
 ```text
 VoteWise/
-  index.html              # SPA shell with CSP, noscript, a11y landmarks
+  index.html              # SPA shell with CSP, noscript, config placeholders
+  Dockerfile              # Multi-stage production build (Node + Nginx)
+  entrypoint.sh           # Runtime secret injection script
+  nginx.conf              # Hardened Nginx configuration
   public/
-    election-data.json     # Browser-fetchable election feed
+    election-data.json    # Browser-fetchable election feed
   src/
-    config/constants.js    # Environment variables, API endpoints
-    data/electionData.js   # Curated fallback election dataset
-    main.js                # Entry point with error boundaries
-    modules/
-      api.js               # Gemini API client (chat + JSON generation)
-      chat.js              # Chat UI, rate limiting, history management
-      countdown.js         # Real-time election countdown timers
-      data.js              # Data loading, normalization, enrichment
-      dom.js               # XSS-safe DOM utilities
-      liveData.js          # Gemini Search grounding + sessionStorage cache
-      quiz.js              # AI quiz generation + schema validation
-      readiness.js         # Voter readiness decision engine
-      render.js            # Data-driven UI rendering
-      simulator.js         # Polling booth simulator + Maps integration
-      timeline.js          # Accordion behavior for election journey
-    styles/main.css        # Design system with CSS custom properties
-  tests/                   # Vitest unit tests (8 suites, 44+ tests)
+    config/constants.js   # Prioritizes window.APP_CONFIG over import.meta.env
+    data/electionData.js  # Curated fallback election dataset
+    main.js               # Entry point with error boundaries
+    modules/              # Feature modules (chat, quiz, timeline, etc.)
+  tests/                  # Vitest unit tests (8 suites)
 ```
+
+---
+*Verified data snapshot: April 2026. This app does not recommend parties, candidates, or ideologies. It provides neutral process guidance only.*

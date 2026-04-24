@@ -51,7 +51,7 @@ function buildDataStatus(data, meta) {
   const liveTag = meta.live ? ' 🔴 Live data enriched via AI.' : '';
   if (meta.mode === 'remote-feed') return `Live election feed loaded. Verified ${verified}.${liveTag}`;
   if (meta.error) return `Verified data snapshot: ${verified}. Live feed unavailable.${liveTag || ' Using local dataset.'}`;
-  return `Verified data snapshot: ${verified}.${liveTag || ' Live feed can be connected with VITE_ELECTION_DATA_URL.'}`;
+  return `Verified data snapshot: ${verified}.${liveTag || ' Live feed can be connected with ELECTION_DATA_URL.'}`;
 }
 
 function renderReadinessOptions(data) {
