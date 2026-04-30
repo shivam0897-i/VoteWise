@@ -125,12 +125,12 @@
         <form class="readiness-form" id="readiness-form">
           <label>
             State or UT
-            <select id="readiness-state" name="region" required></select>
+            <select id="readiness-state" name="region" required aria-required="true"></select>
           </label>
 
           <label>
             Age status
-            <select name="age" required>
+            <select name="age" required aria-required="true">
               <option value="eligible">I am 18 or older on a qualifying date</option>
               <option value="soon">I turn 18 this year</option>
               <option value="underage">I am not eligible yet</option>
@@ -139,7 +139,7 @@
 
           <label>
             Name on electoral roll
-            <select name="roll" required>
+            <select name="roll" required aria-required="true">
               <option value="unsure">I am not sure</option>
               <option value="yes">Yes, my name appears</option>
               <option value="no">No, my name is missing</option>
@@ -148,7 +148,7 @@
 
           <label>
             Voter ID / EPIC
-            <select name="epic" required>
+            <select name="epic" required aria-required="true">
               <option value="yes">I have EPIC or e-EPIC</option>
               <option value="no">I do not have EPIC with me</option>
             </select>

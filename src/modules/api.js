@@ -68,7 +68,9 @@ export async function generateJSON(prompt) {
   }, 'quiz');
 
   const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
-  return JSON.parse(raw.replace(/```json|```/g, '').trim());
+  // Strip optional markdown code fences that Gemini occasionally wraps around JSON.
+  const cleaned = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim();
+  return JSON.parse(cleaned);
 }
 
 /**
@@ -84,6 +86,12 @@ export async function postToGemini(body, feature = 'general') {
   return postToProxy(body, feature);
 }
 
+/**
+ * Forward a Gemini request body to the configured proxy URL.
+ * @param {object} body - Gemini request payload.
+ * @param {string} feature - Feature tag sent to the proxy for telemetry.
+ * @returns {Promise<object>} Parsed Gemini response.
+ */
 async function postToProxy(body, feature) {
   const res = await fetch(GEMINI_PROXY_URL, {
     method: 'POST',

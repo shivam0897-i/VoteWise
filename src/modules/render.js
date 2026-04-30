@@ -1,5 +1,7 @@
 /**
  * Data-driven UI rendering.
+ * All DOM mutations go through safe helpers (createElement / setText) to
+ * prevent XSS — innerHTML is never used with dynamic data.
  */
 
 import { createElement, setText } from './dom.js';
@@ -20,6 +22,11 @@ export function renderApp(data, meta) {
   renderSources(data);
 }
 
+/**
+ * Render the hero section: cycle title, summary, data-status, and region track.
+ * @param {object} data
+ * @param {{mode: string, error?: string, live?: boolean}} meta
+ */
 function renderHero(data, meta) {
   setText('#cycle-title', data.cycle.title);
   setText('#cycle-summary', data.cycle.summary);
@@ -52,6 +59,12 @@ function renderHero(data, meta) {
   setText('#timer-results-label', nextResult?.label || 'Results');
 }
 
+/**
+ * Build a human-readable data-status string for the hero strip.
+ * @param {object} data
+ * @param {{mode: string, error?: string, live?: boolean}} meta
+ * @returns {string}
+ */
 function buildDataStatus(data, meta) {
   const verified = data.lastVerified ? formatIndiaDateOnly(data.lastVerified) : 'unknown date';
   const liveTag = meta.live ? ' 🔴 Live data enriched via AI.' : '';
@@ -60,6 +73,10 @@ function buildDataStatus(data, meta) {
   return `Verified data snapshot: ${verified}.${liveTag || ' Live feed can be connected with ELECTION_DATA_URL.'}`;
 }
 
+/**
+ * Populate the state/UT select with options from loaded region data.
+ * @param {object} data
+ */
 function renderReadinessOptions(data) {
   const select = document.getElementById('readiness-state');
   if (!select) return;
@@ -70,6 +87,10 @@ function renderReadinessOptions(data) {
   });
 }
 
+/**
+ * Render the journey timeline as a list of disclosure widgets.
+ * @param {object} data
+ */
 function renderTimeline(data) {
   const timeline = document.getElementById('timeline');
   if (!timeline) return;
@@ -104,6 +125,12 @@ function renderTimeline(data) {
   });
 }
 
+/**
+ * Build a row of source-chip links for a given set of source IDs.
+ * @param {object} data
+ * @param {string[]} [sourceIds]
+ * @returns {HTMLElement|null}
+ */
 function buildSourceLinks(data, sourceIds = []) {
   const sources = sourceIds.map((id) => findSource(data, id)).filter(Boolean);
   if (!sources.length) return null;
@@ -121,6 +148,10 @@ function buildSourceLinks(data, sourceIds = []) {
   return wrap;
 }
 
+/**
+ * Pre-render simulator step buttons so initSimulator can wire up events.
+ * @param {object} data
+ */
 function renderSimulatorShell(data) {
   const steps = document.getElementById('simulator-steps');
   if (!steps) return;
@@ -138,6 +169,10 @@ function renderSimulatorShell(data) {
   });
 }
 
+/**
+ * Render the official voter tool cards grid.
+ * @param {object} data
+ */
 function renderTools(data) {
   const grid = document.getElementById('tools-grid');
   if (!grid) return;
@@ -158,6 +193,10 @@ function renderTools(data) {
   });
 }
 
+/**
+ * Populate chat suggestion chips.
+ * @param {object} data
+ */
 function renderChatShell(data) {
   const chips = document.getElementById('chat-chips');
   if (!chips) return;
@@ -172,6 +211,10 @@ function renderChatShell(data) {
   });
 }
 
+/**
+ * Render official source citation cards.
+ * @param {object} data
+ */
 function renderSources(data) {
   const list = document.getElementById('sources-list');
   if (!list) return;
