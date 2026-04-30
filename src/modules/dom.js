@@ -18,6 +18,9 @@ export function createElement(tag, attrs = {}, textContent = '') {
       el.className = value;
     } else if (key === 'dataset') {
       Object.assign(el.dataset, value);
+    } else if (key === 'htmlFor') {
+      // Use the DOM property so the browser maps it to the 'for' attribute correctly.
+      el.htmlFor = value;
     } else if (key.startsWith('aria')) {
       el.setAttribute(key.replace(/([A-Z])/g, '-$1').toLowerCase(), value);
     } else {

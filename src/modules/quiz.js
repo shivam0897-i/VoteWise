@@ -13,6 +13,11 @@ let currentIdx = 0;
 let score = 0;
 let isSending = false;
 
+/** Transition the quiz to a single named state, hiding all others. */
+function switchQuizState(id) {
+  showQuizState(id, STATES.filter((s) => s !== id));
+}
+
 export function validateQuizData(data) {
   if (!data || !Array.isArray(data.questions)) return false;
   if (data.questions.length !== 5) return false;
@@ -47,7 +52,7 @@ export function initQuiz(data) {
 async function start(data) {
   if (isSending) return;
   isSending = true;
-  showQuizState('quiz-loading', STATES.filter((state) => state !== 'quiz-loading'));
+  switchQuizState('quiz-loading');
   score = 0;
   currentIdx = 0;
 
@@ -55,13 +60,13 @@ async function start(data) {
     const response = await generateJSON(buildQuizPrompt(data));
     if (!validateQuizData(response)) throw new Error('Invalid quiz format received from Gemini.');
     questions = response.questions;
-    showQuizState('quiz-playing', STATES.filter((state) => state !== 'quiz-playing'));
+    switchQuizState('quiz-playing');
     renderQuestion();
   } catch (err) {
     console.error('[Quiz]', err);
     const errMsg = document.getElementById('quiz-error-msg');
     if (errMsg) errMsg.textContent = `Quiz could not load: ${err.message}`;
-    showQuizState('quiz-error', STATES.filter((state) => state !== 'quiz-error'));
+    switchQuizState('quiz-error');
   } finally {
     isSending = false;
   }
@@ -73,7 +78,7 @@ function renderQuestion() {
   container.textContent = '';
 
   const q = questions[currentIdx];
-  container.appendChild(createElement('p', { className: 'quiz__progress' }, `Question ${currentIdx + 1} of 5`));
+  container.appendChild(createElement('p', { className: 'quiz__progress', ariaLive: 'polite' }, `Question ${currentIdx + 1} of ${questions.length}`));
   container.appendChild(createElement('p', { className: 'quiz__question' }, q.question));
 
   const optionsDiv = createElement('div', { role: 'radiogroup', ariaLabel: 'Answer options' });
@@ -83,6 +88,7 @@ function renderQuestion() {
       {
         className: 'quiz__option',
         type: 'button',
+        ariaLabel: `Option ${String.fromCharCode(65 + index)}: ${option}`,
         dataset: { index: String(index) },
       },
       option
@@ -114,11 +120,11 @@ function handleAnswer(selected, optionsDiv) {
   const nextBtn = createElement(
     'button',
     { className: 'btn btn--primary', type: 'button' },
-    currentIdx < 4 ? 'Next question' : 'See score'
+    currentIdx < questions.length - 1 ? 'Next question' : 'See score'
   );
   nextBtn.addEventListener('click', () => {
     currentIdx += 1;
-    if (currentIdx < 5) renderQuestion();
+    if (currentIdx < questions.length) renderQuestion();
     else showScoreScreen();
   });
   feedback.appendChild(nextBtn);
@@ -127,7 +133,7 @@ function handleAnswer(selected, optionsDiv) {
 }
 
 function showScoreScreen() {
-  showQuizState('quiz-scored', STATES.filter((state) => state !== 'quiz-scored'));
+  switchQuizState('quiz-scored');
   const scoreEl = document.getElementById('quiz-final-score');
   const msgEl = document.getElementById('quiz-score-msg');
   if (scoreEl) scoreEl.textContent = String(score);
@@ -135,7 +141,10 @@ function showScoreScreen() {
 }
 
 function reset() {
-  showQuizState('quiz-idle', STATES.filter((state) => state !== 'quiz-idle'));
+  questions = [];
+  currentIdx = 0;
+  score = 0;
+  switchQuizState('quiz-idle');
 }
 
 /**

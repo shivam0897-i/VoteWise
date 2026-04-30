@@ -28,6 +28,7 @@ function renderHero(data, meta) {
   const track = document.getElementById('region-track');
   if (!track) return;
   track.textContent = '';
+  track.setAttribute('role', 'list');
 
   data.regions.forEach((region) => {
     const statusLabel = region.status === 'active' ? 'voting in progress'
@@ -35,6 +36,7 @@ function renderHero(data, meta) {
       : 'results declared';
     const item = createElement('article', {
       className: `region-pill region-pill--${region.status}`,
+      role: 'listitem',
       tabIndex: '0',
       ariaLabel: `${region.name}: ${region.seats} seats, ${statusLabel}, polling ${region.pollLabel}`,
     });

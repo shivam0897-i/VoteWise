@@ -202,6 +202,9 @@ function buildQuickActions() {
         card.target = '_blank';
         card.rel = 'noopener noreferrer';
       }
+    } else {
+      // Non-interactive info card — mark for AT as a note so it is not confused with a link
+      card.setAttribute('role', 'note');
     }
 
     card.appendChild(createElement('span', {
