@@ -30,13 +30,17 @@ function renderHero(data, meta) {
   track.textContent = '';
 
   data.regions.forEach((region) => {
+    const statusLabel = region.status === 'active' ? 'voting in progress'
+      : region.status === 'upcoming' ? 'upcoming election'
+      : 'results declared';
     const item = createElement('article', {
       className: `region-pill region-pill--${region.status}`,
       tabIndex: '0',
+      ariaLabel: `${region.name}: ${region.seats} seats, ${statusLabel}, polling ${region.pollLabel}`,
     });
-    item.appendChild(createElement('span', { className: 'region-pill__name' }, region.name));
-    item.appendChild(createElement('span', { className: 'region-pill__meta' }, `${region.seats} seats`));
-    item.appendChild(createElement('span', { className: 'region-pill__date' }, region.pollLabel));
+    item.appendChild(createElement('span', { className: 'region-pill__name', ariaHidden: 'true' }, region.name));
+    item.appendChild(createElement('span', { className: 'region-pill__meta', ariaHidden: 'true' }, `${region.seats} seats`));
+    item.appendChild(createElement('span', { className: 'region-pill__date', ariaHidden: 'true' }, region.pollLabel));
     track.appendChild(item);
   });
 
@@ -160,6 +164,7 @@ function renderChatShell(data) {
     chips.appendChild(createElement('button', {
       className: 'chip',
       type: 'button',
+      ariaLabel: `Ask VoteWise: ${query}`,
       dataset: { query },
     }, query));
   });

@@ -52,4 +52,29 @@ describe('Gemini API transport', () => {
     await expect(generateJSON('Return JSON')).rejects.toThrow('GEMINI_PROXY_URL is not configured');
     expect(fetchMock).not.toHaveBeenCalled();
   });
+
+  it('throws a meaningful error when the proxy returns a non-OK status', async () => {
+    window.APP_CONFIG = {
+      GEMINI_PROXY_URL: 'https://votewise-gemini-proxy.example.run.app',
+      GEMINI_MODEL: 'gemini-test',
+    };
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 429,
+      json: async () => ({ error: { message: 'Quota exceeded' } }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { chatCompletion } = await import('../src/modules/api.js');
+    await expect(chatCompletion('System', [], 'Hello')).rejects.toThrow('Quota exceeded');
+  });
+
+  it('reports hasGeminiTransport correctly based on proxy URL', async () => {
+    window.APP_CONFIG = {
+      GEMINI_PROXY_URL: 'https://example.run.app',
+      GEMINI_MODEL: 'gemini-test',
+    };
+    const { hasGeminiTransport } = await import('../src/modules/api.js');
+    expect(hasGeminiTransport()).toBe(true);
+  });
 });
