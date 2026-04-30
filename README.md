@@ -69,10 +69,20 @@ VoteWise provides a frictionless, step-by-step journey for the user:
 ## 🏗️ Architecture & Security
 VoteWise is hardened for production and complies with strict engineering standards:
 
+### Google Cloud Workflow
+- **Cloud Run** serves the production Vite build through hardened Nginx.
+- **Cloud Functions** can proxy Gemini requests so the production API key stays server-side.
+- **BigQuery** can capture anonymized AI-request telemetry for reliability analysis without storing prompts or user messages.
+- **Cloud Storage** can host the public `election-data.json` feed consumed by `ELECTION_DATA_URL`.
+- **Gemini API + Google Search grounding** power chat, quiz generation, and the live election pulse.
+- **Google Maps Embed, Google Translate, Google Fonts, and Material Icons** support booth context, multilingual access, typography, and UI clarity.
+
 ### Runtime Configuration Injection
-API keys and models are **never baked into the static build**. 
-- The Docker container uses an `entrypoint.sh` script to intercept startup and inject environment variables (`GEMINI_API_KEY`, `ELECTION_DATA_URL`) directly into a `window.APP_CONFIG` object.
-- This allows the exact same Docker image to be promoted across environments strictly adhering to 12-factor app principles.
+Runtime values are **never baked into the static build**.
+- The Docker container uses an `entrypoint.sh` script to inject browser-safe environment variables (`GEMINI_PROXY_URL`, `GEMINI_MODEL`, `ELECTION_DATA_URL`, `GOOGLE_MAPS_KEY`, `ENABLE_SEARCH_GROUNDING`) into `window.APP_CONFIG`.
+- Production deployments should use the included Cloud Function proxy (`functions/gemini-proxy`) and store `GEMINI_API_KEY` in Secret Manager or function environment variables.
+- The frontend never receives `GEMINI_API_KEY`; all Gemini requests go through `GEMINI_PROXY_URL`.
+- This allows the exact same Docker image to be promoted across environments while following 12-factor app principles.
 
 ### Defense-in-Depth Protections
 - **Strict Content Security Policy (CSP)**: Restricts scripts, styles, and connections to known Google origins.
@@ -99,7 +109,8 @@ Built to be usable by everyone:
 ```bash
 npm install
 cp .env.example .env
-# Edit .env with your VITE_GEMINI_API_KEY
+# Edit .env with GEMINI_PROXY_URL for the frontend.
+# Use GEMINI_API_KEY only for the Cloud Function proxy runtime.
 npm run dev
 ```
 
@@ -108,22 +119,29 @@ To build and run the secure production container locally:
 ```bash
 docker build -t votewise .
 docker run -p 8080:80 \
-  -e GEMINI_API_KEY="your_production_key" \
-  -e GEMINI_MODEL="gemini-3.1-pro-preview" \
+  -e GEMINI_PROXY_URL="https://YOUR_FUNCTION_URL" \
+  -e GEMINI_MODEL="gemini-2.5-flash" \
+  -e ELECTION_DATA_URL="https://storage.googleapis.com/YOUR_BUCKET/election-data.json" \
+  -e GOOGLE_MAPS_KEY="your_maps_embed_key" \
+  -e ENABLE_SEARCH_GROUNDING="true" \
   votewise
 ```
 
-To deploy directly to Google Cloud Run:
+To deploy directly to Google Cloud Run with the optional Cloud Function proxy:
 ```bash
+gcloud config set project utility-ridge-494115-u8
+
 gcloud run deploy votewise \
   --source . \
   --region us-central1 \
-  --set-env-vars="GEMINI_API_KEY=your_key,GEMINI_MODEL=gemini-3.1-pro-preview" \
-  --allow-unauthenticated
+  --allow-unauthenticated \
+  --set-env-vars="GEMINI_PROXY_URL=https://YOUR_FUNCTION_URL,GEMINI_MODEL=gemini-2.5-flash,ELECTION_DATA_URL=https://storage.googleapis.com/YOUR_BUCKET/election-data.json,GOOGLE_MAPS_KEY=YOUR_MAPS_EMBED_KEY,ENABLE_SEARCH_GROUNDING=true"
 ```
 
+See [`docs/google-cloud-workflow.md`](docs/google-cloud-workflow.md) and [`functions/gemini-proxy`](functions/gemini-proxy) for the Cloud Functions + BigQuery production path.
+
 ## 🧪 Testing Strategy
-VoteWise is backed by 44+ unit tests across 8 suites using Vitest.
+VoteWise is backed by 49+ unit tests across 10 suites using Vitest.
 
 ```bash
 npm test        # Run the test suite
@@ -131,6 +149,7 @@ npm run build   # Build production bundle (~22 kB gzipped)
 ```
 **Test Coverage Includes:**
 - XSS injection prevention (`dom.test.js`)
+- Production env isolation (`production-env.test.js`)
 - AI output schema validation (`quiz.test.js`)
 - Live data merge immutability (`liveData.test.js`)
 - Voter readiness decision branching (`readiness.test.js`)
@@ -142,6 +161,10 @@ VoteWise/
   Dockerfile              # Multi-stage production build (Node + Nginx)
   entrypoint.sh           # Runtime secret injection script
   nginx.conf              # Hardened Nginx configuration
+  docs/
+    google-cloud-workflow.md
+  functions/
+    gemini-proxy/         # Optional Cloud Functions Gemini proxy + BigQuery logging
   public/
     election-data.json    # Browser-fetchable election feed
   src/
@@ -149,7 +172,7 @@ VoteWise/
     data/electionData.js  # Curated fallback election dataset
     main.js               # Entry point with error boundaries
     modules/              # Feature modules (chat, quiz, timeline, etc.)
-  tests/                  # Vitest unit tests (8 suites)
+  tests/                  # Vitest unit tests (10 suites)
 ```
 
 ---

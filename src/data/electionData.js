@@ -1,7 +1,7 @@
 /**
  * Curated fallback data for VoteWise.
  *
- * The app first tries VITE_ELECTION_DATA_URL. This local file keeps the demo
+ * The app first tries ELECTION_DATA_URL. This local file keeps the demo
  * useful when a live JSON feed is not configured.
  */
 

@@ -1,23 +1,22 @@
 /**
  * Gemini API client.
  *
- * The API key is read from the VITE_GEMINI_API_KEY environment variable.
- * For a production public deployment, put this behind a small server or
- * Apps Script proxy so the key is never exposed to the browser.
+ * All browser Gemini requests go through GEMINI_PROXY_URL, backed by the
+ * Cloud Function in functions/gemini-proxy. The Gemini API key is never
+ * injected into browser code.
  */
 
-import { ENABLE_SEARCH_GROUNDING, GEMINI_API_KEY, GEMINI_ENDPOINT } from '../config/constants.js';
+import {
+  ENABLE_SEARCH_GROUNDING,
+  GEMINI_PROXY_URL,
+} from '../config/constants.js';
 
 /**
- * Return the configured Gemini API key.
- * @returns {string}
- * @throws {Error} if no key is configured.
+ * Whether the app has a configured Gemini transport.
+ * @returns {boolean}
  */
-export function getApiKey() {
-  if (!GEMINI_API_KEY) {
-    throw new Error('VITE_GEMINI_API_KEY is not set. Add it to your .env file.');
-  }
-  return GEMINI_API_KEY;
+export function hasGeminiTransport() {
+  return Boolean(GEMINI_PROXY_URL);
 }
 
 /**
@@ -48,7 +47,7 @@ export async function chatCompletion(systemPrompt, history, userMessage) {
     body.tools = [{ google_search: {} }];
   }
 
-  const data = await postToGemini(body);
+  const data = await postToGemini(body, 'chat');
   return data.candidates?.[0]?.content?.parts?.[0]?.text || 'I could not generate a response.';
 }
 
@@ -66,24 +65,38 @@ export async function generateJSON(prompt) {
       responseMimeType: 'application/json',
       thinkingConfig: { thinkingBudget: 0 },
     },
-  });
+  }, 'quiz');
 
   const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
   return JSON.parse(raw.replace(/```json|```/g, '').trim());
 }
 
-async function postToGemini(body) {
-  const key = getApiKey();
-  const res = await fetch(`${GEMINI_ENDPOINT}?key=${key}`, {
+/**
+ * Post a Gemini request through the configured transport.
+ * @param {object} body
+ * @param {string} feature
+ * @returns {Promise<object>}
+ */
+export async function postToGemini(body, feature = 'general') {
+  if (!GEMINI_PROXY_URL) {
+    throw new Error('GEMINI_PROXY_URL is not configured.');
+  }
+  return postToProxy(body, feature);
+}
+
+async function postToProxy(body, feature) {
+  const res = await fetch(GEMINI_PROXY_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
+    body: JSON.stringify({ feature, request: body }),
   });
 
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err?.error?.message || `API error ${res.status}`);
-  }
+  if (!res.ok) throw new Error(await responseErrorMessage(res));
 
   return res.json();
+}
+
+async function responseErrorMessage(res) {
+  const err = await res.json().catch(() => ({}));
+  return err?.error?.message || err?.message || `API error ${res.status}`;
 }

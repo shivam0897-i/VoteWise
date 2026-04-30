@@ -3,24 +3,48 @@
  * Election facts live in src/data/electionData.js or in a remote JSON feed.
  */
 
-export const GEMINI_MODEL = (window.APP_CONFIG && window.APP_CONFIG.VITE_GEMINI_MODEL !== '__GEMINI_MODEL__') 
-  ? window.APP_CONFIG.VITE_GEMINI_MODEL 
-  : import.meta.env?.VITE_GEMINI_MODEL || 'gemini-2.5-flash';
+const runtimeConfig = window.APP_CONFIG || {};
+const buildConfig = typeof __APP_ENV__ === 'object' ? __APP_ENV__ : {};
 
-export const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+function buildValue(key, fallback = '') {
+  return buildConfig[key] || fallback;
+}
 
-export const GEMINI_API_KEY = (window.APP_CONFIG && window.APP_CONFIG.VITE_GEMINI_API_KEY !== '__GEMINI_API_KEY__')
-  ? window.APP_CONFIG.VITE_GEMINI_API_KEY
-  : import.meta.env?.VITE_GEMINI_API_KEY || '';
+function runtimeValue(key, placeholder, fallback = '') {
+  if (!Object.prototype.hasOwnProperty.call(runtimeConfig, key)) return fallback;
+  const value = runtimeConfig[key];
+  return value !== null && value !== undefined && value !== placeholder ? String(value) : fallback;
+}
 
-export const DATA_FEED_URL = (window.APP_CONFIG && window.APP_CONFIG.ELECTION_DATA_URL !== '__ELECTION_DATA_URL__')
-  ? window.APP_CONFIG.ELECTION_DATA_URL
-  : import.meta.env?.VITE_ELECTION_DATA_URL || '';
+export const GEMINI_MODEL = runtimeValue(
+  'GEMINI_MODEL',
+  '__GEMINI_MODEL__',
+  buildValue('GEMINI_MODEL', 'gemini-2.5-flash')
+);
 
-export const ENABLE_SEARCH_GROUNDING =
-  import.meta.env?.VITE_ENABLE_SEARCH_GROUNDING !== 'false';
+export const GEMINI_PROXY_URL = runtimeValue(
+  'GEMINI_PROXY_URL',
+  '__GEMINI_PROXY_URL__',
+  buildValue('GEMINI_PROXY_URL')
+).replace(/\/$/, '');
 
-export const GOOGLE_MAPS_KEY = import.meta.env?.VITE_GOOGLE_MAPS_KEY || '';
+export const DATA_FEED_URL = runtimeValue(
+  'ELECTION_DATA_URL',
+  '__ELECTION_DATA_URL__',
+  buildValue('ELECTION_DATA_URL')
+);
+
+export const ENABLE_SEARCH_GROUNDING = runtimeValue(
+  'ENABLE_SEARCH_GROUNDING',
+  '__ENABLE_SEARCH_GROUNDING__',
+  buildValue('ENABLE_SEARCH_GROUNDING', 'true')
+) !== 'false';
+
+export const GOOGLE_MAPS_KEY = runtimeValue(
+  'GOOGLE_MAPS_KEY',
+  '__GOOGLE_MAPS_KEY__',
+  buildValue('GOOGLE_MAPS_KEY')
+);
 
 export const SCORE_MESSAGES = {
   5: 'Democracy champion. You can explain the process to someone else.',

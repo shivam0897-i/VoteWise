@@ -3,10 +3,11 @@
  *
  * On startup, this module asks Gemini (with Google Search) for the latest
  * election status updates, then merges them into the base election data.
- * This gives us genuinely real-time information without needing a backend.
+ * This gives us genuinely real-time information through the Gemini proxy.
  */
 
-import { GEMINI_API_KEY, GEMINI_ENDPOINT, ENABLE_SEARCH_GROUNDING } from '../config/constants.js';
+import { ENABLE_SEARCH_GROUNDING } from '../config/constants.js';
+import { hasGeminiTransport, postToGemini } from './api.js';
 
 const LIVE_DATA_PROMPT = `You are a factual Indian election data assistant. Today's date is ${new Date().toLocaleDateString('en-IN', { dateStyle: 'full', timeZone: 'Asia/Kolkata' })}.
 
@@ -53,7 +54,7 @@ Rules:
  * @returns {Promise<object|null>}
  */
 export async function fetchLiveElectionData() {
-  if (!GEMINI_API_KEY || !ENABLE_SEARCH_GROUNDING) {
+  if (!hasGeminiTransport() || !ENABLE_SEARCH_GROUNDING) {
     return null;
   }
 
@@ -70,24 +71,16 @@ export async function fetchLiveElectionData() {
   }
 
   try {
-    const res = await fetch(`${GEMINI_ENDPOINT}?key=${GEMINI_API_KEY}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ role: 'user', parts: [{ text: LIVE_DATA_PROMPT }] }],
-        tools: [{ google_search: {} }],
-        generationConfig: {
-          temperature: 0.1,
-          maxOutputTokens: 4096,
-          responseMimeType: 'application/json',
-          thinkingConfig: { thinkingBudget: 0 },
-        },
-      }),
-    });
-
-    if (!res.ok) return null;
-
-    const data = await res.json();
+    const data = await postToGemini({
+      contents: [{ role: 'user', parts: [{ text: LIVE_DATA_PROMPT }] }],
+      tools: [{ google_search: {} }],
+      generationConfig: {
+        temperature: 0.1,
+        maxOutputTokens: 4096,
+        responseMimeType: 'application/json',
+        thinkingConfig: { thinkingBudget: 0 },
+      },
+    }, 'live-election-data');
     const raw = data.candidates?.[0]?.content?.parts?.[0]?.text;
     if (!raw) return null;
 
